@@ -99,7 +99,7 @@ async function login(page, account) {
       await page.fill('#login-username-field', account.username);
 
       await page.fill(
-        '#loginForm3 > div > label\\:nth-child(2) > input[type=password]',
+        '#loginForm3 > div > label\:nth-child(2) > input[type=password]',
         account.password
       );
 
