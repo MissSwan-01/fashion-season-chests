@@ -39,11 +39,11 @@ const scripts = [
 
   { name: 'Slots Event', fn: runSlotsEvent, envKey: 'LP_SLOTS_URL' },
 
-  { name: 'Parties', fn: runParties, alwaysRun: true },
+  { name: 'Parties', fn: runParties, alwaysRun: false },
 
   { name: 'Memory Event', fn: runMemoryEvent, envKey: 'LP_MEMORY_URL' },
 
-  { name: 'Furniture Script', fn: runFurnitureScript, alwaysRun: true },
+  { name: 'Furniture Script', fn: runFurnitureScript, alwaysRun: false },
 
   { name: 'Daily Tasks', fn: runDailyTasks, alwaysRun: true },
 
@@ -51,9 +51,9 @@ const scripts = [
 
   { name: 'Guild Show', fn: runGuildShow, alwaysRun: true },
 
-  { name: 'Pet Training', fn: runPetTraining, alwaysRun: false },
+  { name: 'Pet Training', fn: runPetTraining, alwaysRun: true },
 
-  { name: 'Bridesmaids Tasks', fn: runBridesmaids, alwaysRun: true },
+  { name: 'Bridesmaids Tasks', fn: runBridesmaids, alwaysRun: false },
 
 ];
 
