@@ -45,8 +45,7 @@ jobs:
       - name: 🚀 Run mspc.js script
         run: node mspc.js
         env:
-          LP_EMAIL: ${{ secrets.LP_EMAIL }}
-          LP_PASSWORD: ${{ secrets.LP_PASSWORD }}
+          LP_ACCOUNTS: ${{ secrets.LP_ACCOUNTS }}
           LP_TELEPORT_URL: ${{ secrets.LP_TELEPORT_URL }}
           LP_MAPS_URL: ${{ secrets.LP_MAPS_URL }}
           LP_SLOTS_URL: ${{ secrets.LP_SLOTS_URL }}
