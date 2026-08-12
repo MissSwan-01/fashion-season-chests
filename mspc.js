@@ -18,7 +18,7 @@ const runMemoryEvent = require('./memory.js');
 const runFurnitureScript = require('./furniture.js');
 const runDailyTasks = require('./daily-tasks.js');
 const runBoyfriendKiss = require('./bfk.js');
-const runGuildShow = require('./guild-show\.js');
+const runGuildShow = require('./guild-show.js');
 const runPetTraining = require('./pet-train.js');
 const runBridesmaids = require('./bridesmaids.js');
 const runParties = require('./parties.js');
@@ -29,19 +29,19 @@ const scripts = [
 
   { name: 'Burn Energy', fn: runBurnEnergy, alwaysRun: true },
 
-  { name: 'Fashion Magazine', fn: runFashionMagazine, envKey: 'LP\_FASHION\_MAGAZINE\_URL' },
+  { name: 'Fashion Magazine', fn: runFashionMagazine, envKey: 'LP_FASHION_MAGAZINE_URL' },
 
-  { name: 'Tele Event', fn: runTeleportEvent, envKey: 'LP\_TELEPORT\_URL' },
+  { name: 'Tele Event', fn: runTeleportEvent, envKey: 'LP_TELEPORT_URL' },
 
-  { name: 'Solitaire Event', fn: runSolitaireEvent, envKey: 'LP\_SOLITAIRE\_URL' },
+  { name: 'Solitaire Event', fn: runSolitaireEvent, envKey: 'LP_SOLITAIRE_URL' },
 
-  { name: 'Maps Event', fn: runMapsEvent, envKey: 'LP\_MAPS\_URL' },
+  { name: 'Maps Event', fn: runMapsEvent, envKey: 'LP_MAPS_URL' },
 
-  { name: 'Slots Event', fn: runSlotsEvent, envKey: 'LP\_SLOTS\_URL' },
+  { name: 'Slots Event', fn: runSlotsEvent, envKey: 'LP_SLOTS_URL' },
 
   { name: 'Parties', fn: runParties, alwaysRun: false },
 
-  { name: 'Memory Event', fn: runMemoryEvent, envKey: 'LP\_MEMORY\_URL' },
+  { name: 'Memory Event', fn: runMemoryEvent, envKey: 'LP_MEMORY_URL' },
 
   { name: 'Furniture Script', fn: runFurnitureScript, alwaysRun: false },
 
@@ -65,7 +65,7 @@ const scripts = [
 
 async function login(page, account) {
 
-  console.log(\`🔐 Logging into ${account.name}...\`);
+  console.log(`🔐 Logging into ${account.name}...`);
 
   let loginSuccess = false;
 
@@ -73,9 +73,9 @@ async function login(page, account) {
 
     try {
 
-      console.log(\`🔐 [${account.name}] Attempt ${attempt}: Opening Lady Popular login page...\`);
+      console.log(`🔐 [${account.name}] Attempt ${attempt}: Opening Lady Popular login page...`);
 
-      await page.goto('[https://ladypopular.com](https://ladypopular.com)', {
+      await page.goto('https://ladypopular.com', {
         waitUntil: 'domcontentloaded',
         timeout: 60000,
       });
@@ -92,14 +92,14 @@ async function login(page, account) {
 
 
 
-      console.log(\`🔐 [${account.name}] Entering credentials...\`);
+      console.log(`🔐 [${account.name}] Entering credentials...`);
 
       await page.waitForSelector('#login-username-field', { timeout: 10000 });
 
       await page.fill('#login-username-field', account.username);
 
       await page.fill(
-        '#loginForm3 > div > label\\\:nth-child(2) > input[type=password]',
+        '#loginForm3 > div > label\\:nth-child(2) > input[type=password]',
         account.password
       );
 
@@ -111,7 +111,7 @@ async function login(page, account) {
 
       await page.waitForSelector('#header', { timeout: 15000 });
 
-      console.log(\`🎉 [${account.name}] Login successful.\`);
+      console.log(`🎉 [${account.name}] Login successful.`);
 
       loginSuccess = true;
 
@@ -120,11 +120,11 @@ async function login(page, account) {
     } catch (error) {
 
       console.log(
-        \`❌ [${account.name}] Login attempt ${attempt} failed: ${error.message}\`
+        `❌ [${account.name}] Login attempt ${attempt} failed: ${error.message}`
       );
 
       await page.screenshot({
-        path: \`${account.name.replace(/\s+/g, '\_')}-login-error-${attempt}.png\`,
+        path: `${account.name.replace(/\s+/g, '_')}-login-error-${attempt}.png`,
         fullPage: true
       });
 
@@ -133,7 +133,7 @@ async function login(page, account) {
       if (attempt === 5) {
 
         console.log(
-          \`🚫 [${account.name}] Max login attempts reached. Aborting this account.\`
+          `🚫 [${account.name}] Max login attempts reached. Aborting this account.`
         );
 
         throw error;
@@ -150,98 +150,94 @@ async function login(page, account) {
 
 
 // ================================================================
+// 🎁 DAILY REWARD COLLECTION
+// ================================================================
+
+async function collectDailyReward(page) {
+
+  console.log(DIVIDER);
+  console.log("🎁 Starting daily reward collection...");
+  console.log("📡 Endpoint: /ajax/daily_rewards.php");
+  console.log("🔁 Will attempt dates 1 → 7");
+
+  for (let date = 1; date <= 7; date++) {
+
+    try {
+
+      console.log(`➡️ Sending daily reward request for date = ${date}...`);
+
+      const response = await page.evaluate(async (date) => {
+
+        const res = await fetch(
+          'https://v3.g.ladypopular.com/ajax/daily_rewards.php',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+              type: 'collectSevenDayReward',
+              date: date
+            }),
+            credentials: 'same-origin'
+          }
+        );
+
+        return await res.json();
+
+      }, date);
+
+      console.log(
+        `📦 Date ${date} → status=${response.status}` +
+        (response.message ? ` | message="${response.message}"` : '')
+      );
+
+      if (response.status === 1) {
+
+        console.log(
+          `🎉 Daily reward successfully collected for date ${date}.`
+        );
+
+        console.log(
+          "⛔ Future dates will be locked. Stopping further requests."
+        );
+
+        break;
+      }
+
+      await page.waitForTimeout(500);
+
+    } catch (err) {
+
+      console.log(
+        `❌ Daily reward request failed for date ${date}: ${err.message}`
+      );
+
+    }
+
+  }
+
+  console.log("🎁 Daily reward collection block finished.");
+  console.log(DIVIDER);
+
+}
+
+
+
+// ================================================================
 // 🧩 RUN ALL SCRIPTS
 // ================================================================
 
 async function runAllScripts(page) {
 
-  // ==============================================================
-
-  // 🎁 DAILY REWARD COLLECTION
-
-  // ==============================================================
-
-  /\*
-  REMOVE THIS IF U WANT LATER
-
-  if (loginSuccess) {
-
-    console.log(DIVIDER);
-    console.log("🎁 Starting daily reward collection...");
-    console.log("📡 Endpoint: /ajax/daily\_rewards.php");
-    console.log("🔁 Will attempt dates 1 → 7");
-
-    for (let date = 1; date <= 7; date++) {
-
-      try {
-
-        console.log(\`➡️ Sending daily reward request for date = ${date}...\`);
-
-        const response = await page.evaluate(async (date) => {
-
-          const res = await fetch(
-            '[https://v3.g.ladypopular.com/ajax/daily\_rewards.php](https://v3.g.ladypopular.com/ajax/daily_rewards.php)',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: new URLSearchParams({
-                type: 'collectSevenDayReward',
-                date: date
-              }),
-              credentials: 'same-origin'
-            }
-          );
-
-          return await res.json();
-
-        }, date);
-
-        console.log(
-          \`📦 Date ${date} → status=${response.status}\` +
-          (response.message ? \` | message="${response.message}"\` : '')
-        );
-
-        if (response.status === 1) {
-
-          console.log(
-            \`🎉 Daily reward successfully collected for date ${date}.\`
-          );
-
-          console.log(
-            "⛔ Future dates will be locked. Stopping further requests."
-          );
-
-          break;
-        }
-
-        await page.waitForTimeout(500);
-
-      } catch (err) {
-
-        console.log(
-          \`❌ Daily reward request failed for date ${date}: ${err.message}\`
-        );
-
-      }
-
-    }
-
-    console.log("🎁 Daily reward collection block finished.");
-    console.log(DIVIDER);
-
-  }
-  \*/
-
-
-
-  // ==============================================================
-
+  // ==============================================================  
   // ✅ RUN EACH SCRIPT
-
   // ==============================================================
+
+  // IMPORTANT:
+  // This is your existing script loop.
+  // The logic has not been changed.
 
   for (const script of scripts) {
 
@@ -257,7 +253,7 @@ async function runAllScripts(page) {
     if (!shouldRun) {
 
       console.log(
-        \`⏭️ ${script.name} skipped (not active or URL = OFF)\`
+        `⏭️ ${script.name} skipped (not active or URL = OFF)`
       );
 
       continue;
@@ -266,14 +262,14 @@ async function runAllScripts(page) {
 
 
 
-    console.log(\`\n🚀 Starting: ${script.name}\`);
+    console.log(`\n🚀 Starting: ${script.name}`);
 
     try {
 
       await script.fn(page);
 
       console.log(
-        \`✅ ${script.name} finished successfully.\`
+        `✅ ${script.name} finished successfully.`
       );
 
       console.log(DIVIDER);
@@ -281,11 +277,11 @@ async function runAllScripts(page) {
     } catch (err) {
 
       console.log(
-        \`❌ ${script.name} failed: ${err.message}\`
+        `❌ ${script.name} failed: ${err.message}`
       );
 
       await page.screenshot({
-        path: \`${script.name.replace(/\s+/g, '\_')}-error.png\`,
+        path: `${script.name.replace(/\s+/g, '_')}-error.png`,
         fullPage: true
       });
 
@@ -305,10 +301,10 @@ async function runAllScripts(page) {
 
 async function logout(page, account) {
 
-  console.log(\`🚪 Logging out from ${account.name}...\`);
+  console.log(`🚪 Logging out from ${account.name}...`);
 
   await page.goto(
-    '[https://v3.g.ladypopular.com/logout.php](https://v3.g.ladypopular.com/logout.php)',
+    'https://v3.g.ladypopular.com/logout.php',
     {
       waitUntil: 'domcontentloaded',
       timeout: 60000
@@ -320,7 +316,7 @@ async function logout(page, account) {
     timeout: 15000
   });
 
-  console.log(\`✅ [${account.name}] Logout confirmed.\`);
+  console.log(`✅ [${account.name}] Logout confirmed.`);
 
 }
 
@@ -333,23 +329,21 @@ async function logout(page, account) {
 (async () => {
 
   // ==============================================================
-
   // 👥 LOAD ACCOUNTS
-
   // ==============================================================
 
   let accounts;
 
   try {
 
-    accounts = JSON.parse(process.env.LP\_ACCOUNTS);
+    accounts = JSON.parse(process.env.LP_ACCOUNTS);
 
   } catch (error) {
 
-    console.log("❌ Could not read LP\_ACCOUNTS.");
+    console.log("❌ Could not read LP_ACCOUNTS.");
 
     console.log(
-      "❌ Make sure LP\_ACCOUNTS contains valid JSON."
+      "❌ Make sure LP_ACCOUNTS contains valid JSON."
     );
 
     process.exit(1);
@@ -360,7 +354,7 @@ async function logout(page, account) {
 
   if (!Array.isArray(accounts) || accounts.length === 0) {
 
-    console.log("❌ LP\_ACCOUNTS contains no accounts.");
+    console.log("❌ LP_ACCOUNTS contains no accounts.");
 
     process.exit(1);
 
@@ -369,15 +363,13 @@ async function logout(page, account) {
 
 
   console.log(
-    \`👥 Loaded ${accounts.length} account(s).\`
+    `👥 Loaded ${accounts.length} account(s).`
   );
 
 
 
   // ==============================================================
-
   // 🌐 LAUNCH BROWSER
-
   // ==============================================================
 
   const browser = await chromium.launch({
@@ -391,19 +383,16 @@ async function logout(page, account) {
 
 
   // ==============================================================
-
   // 🔁 PROCESS EACH ACCOUNT
-
   // ==============================================================
 
   for (const account of accounts) {
 
     console.log('\n');
-
     console.log(DIVIDER);
 
     console.log(
-      \`👤 Starting account: ${account.name}\`
+      `👤 Starting account: ${account.name}`
     );
 
     console.log(DIVIDER);
@@ -421,66 +410,10 @@ async function logout(page, account) {
 
 
       // ----------------------------------------------------------
-      // 🎁 DAILY REWARD COLLECTION
+      // 🎁 DAILY REWARD
       // ----------------------------------------------------------
 
-      console.log(DIVIDER);
-      console.log("🎁 Starting daily reward collection...");
-      console.log("📡 Endpoint: /ajax/daily_rewards.php");
-      console.log("🔁 Will attempt dates 1 → 7");
-
-      for (let date = 1; date <= 7; date++) {
-
-        try {
-
-          console.log(`➡️ Sending daily reward request for date = ${date}...`);
-
-          const response = await page.evaluate(async (date) => {
-
-            const res = await fetch('https://v3.g.ladypopular.com/ajax/daily_rewards.php', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: new URLSearchParams({
-                type: 'collectSevenDayReward',
-                date: date
-              }),
-              credentials: 'same-origin'
-            });
-
-            return await res.json();
-
-          }, date);
-
-          console.log(
-            `📦 Date ${date} → status=${response.status}` +
-            (response.message ? ` | message="${response.message}"` : '')
-          );
-
-          if (response.status === 1) {
-
-            console.log(`🎉 Daily reward successfully collected for date ${date}.`);
-
-            console.log("⛔ Future dates will be locked. Stopping further requests.");
-
-            break;
-
-          }
-
-          await page.waitForTimeout(500);
-
-        } catch (err) {
-
-          console.log(`❌ Daily reward request failed for date ${date}: ${err.message}`);
-
-        }
-
-      }
-
-      console.log("🎁 Daily reward collection block finished.");
-      console.log(DIVIDER);
+      await collectDailyReward(page);
 
 
 
@@ -501,17 +434,17 @@ async function logout(page, account) {
 
 
       console.log(
-        \`🎉 ${account.name} completed successfully.\`
+        `🎉 ${account.name} completed successfully.`
       );
 
     } catch (err) {
 
       console.log(
-        \`❌ ${account.name} encountered an error: ${err.message}\`
+        `❌ ${account.name} encountered an error: ${err.message}`
       );
 
       console.log(
-        \`⚠️ Moving on from ${account.name}.\`
+        `⚠️ Moving on from ${account.name}.`
       );
 
     }
@@ -521,15 +454,13 @@ async function logout(page, account) {
 
 
   // ==============================================================
-
   // 🛑 CLOSE BROWSER
-
   // ==============================================================
 
   await browser.close();
 
   console.log(
-    \`\n🎉 All accounts processed. Browser closed.\`
+    `\n🎉 All accounts processed. Browser closed.`
   );
 
 })();
