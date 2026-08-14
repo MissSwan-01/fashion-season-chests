@@ -18,10 +18,7 @@
 
 module.exports = async function runApartmentAndGifts(page) {
 
-  console.log('');
-  console.log('════════════════════════════════════════════════════════════════');
-  console.log('🏠 STARTING APARTMENT + GIFTS FLASHBACK SCRIPT');
-  console.log('════════════════════════════════════════════════════════════════');
+  console.log('🏠 Apartment + Gifts flashback starting...');
 
 
   // ==============================================================
@@ -29,21 +26,13 @@ module.exports = async function runApartmentAndGifts(page) {
   // 🏠 APARTMENT INCOME
   // ==============================================================
 
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🏠 STEP 1: Opening Apartment page...');
-  console.log('────────────────────────────────────────────────────────────────');
-
   await page.goto(
-    'https://v3.g.ladypopular.com/apartment.php',
+    '[https://v3.g.ladypopular.com/apartment.php](https://v3.g.ladypopular.com/apartment.php)',
     {
       waitUntil: 'domcontentloaded',
       timeout: 60000
     }
   );
-
-  console.log('✅ Apartment page loaded.');
-
 
 
   // --------------------------------------------------------------
@@ -60,17 +49,12 @@ module.exports = async function runApartmentAndGifts(page) {
   // request is sufficient.
   // --------------------------------------------------------------
 
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🏠 STEP 2: Collecting apartment income...');
-  console.log('────────────────────────────────────────────────────────────────');
-
   try {
 
     const apartmentResponse = await page.evaluate(async () => {
 
       const response = await fetch(
-        'https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent',
+        '[https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent](https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent)',
         {
           method: 'GET',
           credentials: 'same-origin',
@@ -84,34 +68,15 @@ module.exports = async function runApartmentAndGifts(page) {
 
     });
 
-    console.log('📦 Apartment collection response received.');
 
     if (apartmentResponse && apartmentResponse.status === 1) {
 
-      console.log('✅ Apartment income collection request succeeded.');
-
-      // These values are only logged for debugging/information.
-      // The script does NOT depend on them.
-      if (apartmentResponse.apartment_income_data) {
-
-        console.log(
-          `💰 Apartment income: ${apartmentResponse.apartment_income_data.apartment_income}`
-        );
-
-        console.log(
-          `⏳ Time until next income: ${apartmentResponse.apartment_income_data.time_until_next_income}s`
-        );
-
-      }
+      console.log('💰 Apartment income collected.');
 
     } else {
 
       console.log(
-        '⚠️ Apartment request returned a response, but status was not 1.'
-      );
-
-      console.log(
-        `📦 Response status: ${apartmentResponse?.status}`
+        `⚠️ Apartment collection returned status=${apartmentResponse?.status}`
       );
 
     }
@@ -119,7 +84,7 @@ module.exports = async function runApartmentAndGifts(page) {
   } catch (error) {
 
     console.log(
-      `❌ Apartment income request failed: ${error.message}`
+      `❌ Apartment income failed: ${error.message}`
     );
 
     // We throw the error here because the apartment request itself
@@ -129,31 +94,19 @@ module.exports = async function runApartmentAndGifts(page) {
   }
 
 
-  console.log('🏠 Apartment income step finished.');
-
-
-
   // ==============================================================
   // STEP 3 + STEP 4
   // 🎁 OPEN GUILD PAGE
   // CHECK WHETHER A FLASHBACK EVENT IS ALREADY ACTIVE
   // ==============================================================
 
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🎁 STEP 3: Opening Guild page...');
-  console.log('────────────────────────────────────────────────────────────────');
-
   await page.goto(
-    'https://v3.g.ladypopular.com/guild.php',
+    '[https://v3.g.ladypopular.com/guild.php](https://v3.g.ladypopular.com/guild.php)',
     {
       waitUntil: 'domcontentloaded',
       timeout: 60000
     }
   );
-
-  console.log('✅ Guild page loaded.');
-
 
 
   // --------------------------------------------------------------
@@ -166,35 +119,24 @@ module.exports = async function runApartmentAndGifts(page) {
   //
   // We specifically look for:
   //
-  // .header-event-banner[data-is_flashback="1"]
+  // .header-event-banner[data-is\_flashback="1"]
   //
   // A normal/new event has:
   //
-  // data-is_flashback=""
+  // data-is\_flashback=""
   //
   // An active flashback event has:
   //
-  // data-is_flashback="1"
+  // data-is\_flashback="1"
   //
   // We only care about the EVENT flashback slot here.
   // We do NOT treat a flashback collection as an active
   // flashback event.
   // --------------------------------------------------------------
 
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🔎 STEP 4: Checking for an already-active flashback event...');
-  console.log('────────────────────────────────────────────────────────────────');
-
-
   const activeFlashbackEvents = await page.locator(
-    '#header-events-container .header-event-banner[data-is_flashback="1"]'
+    '#header-events-container .header-event-banner[data-is\_flashback="1"]'
   ).count();
-
-
-  console.log(
-    `🔎 Active flashback event elements found: ${activeFlashbackEvents}`
-  );
 
 
   // --------------------------------------------------------------
@@ -209,14 +151,7 @@ module.exports = async function runApartmentAndGifts(page) {
 
   if (activeFlashbackEvents > 0) {
 
-    console.log('');
-    console.log('🟢 CASE 1: A flashback event is already active.');
-    console.log('⛔ No further Gifts event processing is required.');
-    console.log('🏁 Apartment + Gifts script finished.');
-
-    console.log(
-      '════════════════════════════════════════════════════════════════'
-    );
+    console.log('🎁 Flashback event already active. Skipping.');
 
     return;
 
@@ -230,22 +165,11 @@ module.exports = async function runApartmentAndGifts(page) {
   // Continue to Step 5.
   // --------------------------------------------------------------
 
-  console.log('');
-  console.log('🟡 CASE 2: No flashback event is currently active.');
-  console.log('➡️ Proceeding to Step 5.');
-
-
 
   // ==============================================================
   // STEP 5
   // 🎁 GET GIFTS FLASHBACK EVENTS
   // ==============================================================
-
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🎁 STEP 5: Requesting Gifts flashback events...');
-  console.log('────────────────────────────────────────────────────────────────');
-
 
   let eventsResponse;
 
@@ -255,7 +179,7 @@ module.exports = async function runApartmentAndGifts(page) {
     eventsResponse = await page.evaluate(async () => {
 
       const response = await fetch(
-        'https://v3.g.ladypopular.com/ajax/events.php',
+        '[https://v3.g.ladypopular.com/ajax/events.php](https://v3.g.ladypopular.com/ajax/events.php)',
         {
           method: 'POST',
 
@@ -265,8 +189,8 @@ module.exports = async function runApartmentAndGifts(page) {
           },
 
           body: new URLSearchParams({
-            'event_types[]': 'gifts',
-            'ignore_won_rewards': 'false',
+            'event\_types[]': 'gifts',
+            'ignore\_won\_rewards': 'false',
             'type': 'loadMoreEvents',
             'offset': '0',
             'name': ''
@@ -281,12 +205,10 @@ module.exports = async function runApartmentAndGifts(page) {
     });
 
 
-    console.log('📦 Gifts event response received.');
-
   } catch (error) {
 
     console.log(
-      `❌ Failed to request Gifts flashback events: ${error.message}`
+      `❌ Failed to request Gifts events: ${error.message}`
     );
 
     throw error;
@@ -321,29 +243,21 @@ module.exports = async function runApartmentAndGifts(page) {
   }
 
 
-  console.log('✅ Events request returned status=1.');
-
-
 
   // --------------------------------------------------------------
   // The event list is inside:
   //
-  // response.search_events.list
+  // response.search\_events.list
   //
   // According to the response you provided.
   // --------------------------------------------------------------
 
-  const events = eventsResponse.search_events?.list;
+  const events = eventsResponse.search\_events?.list;
 
 
   if (!Array.isArray(events)) {
 
-    console.log('❌ Could not find search_events.list in response.');
-
-    console.log(
-      '🔎 Response keys:',
-      Object.keys(eventsResponse)
-    );
+    console.log('❌ Invalid events response.');
 
     throw new Error(
       'Unexpected events response structure: search_events.list is missing.'
@@ -351,10 +265,6 @@ module.exports = async function runApartmentAndGifts(page) {
 
   }
 
-
-  console.log(
-    `📋 Total event records received in this response: ${events.length}`
-  );
 
 
   // --------------------------------------------------------------
@@ -365,10 +275,10 @@ module.exports = async function runApartmentAndGifts(page) {
   //
   // Your rule:
   //
-  // can_be_activated === true
+  // can\_be\_activated === true
   //       → unlocked
   //
-  // can_be_activated === false
+  // can\_be\_activated === false
   //       → locked
   // --------------------------------------------------------------
 
@@ -379,21 +289,17 @@ module.exports = async function runApartmentAndGifts(page) {
   for (const event of events) {
 
     // We are expecting flashback events here, but we still
-    // explicitly check is_flashback so the script does not
+    // explicitly check is\_flashback so the script does not
     // accidentally treat some other record as a flashback event.
 
-    if (event.is_flashback !== true) {
-
-      console.log(
-        `⚠️ Ignoring non-flashback record: ${event.title} (ID ${event.id})`
-      );
+    if (event.is\_flashback !== true) {
 
       continue;
 
     }
 
 
-    if (event.can_be_activated === true) {
+    if (event.can\_be\_activated === true) {
 
       unlockedEvents.push({
         id: event.id,
@@ -405,7 +311,7 @@ module.exports = async function runApartmentAndGifts(page) {
       lockedEvents.push({
         id: event.id,
         title: event.title,
-        lockReason: event.lock_type_info
+        lockReason: event.lock\_type\_info
       });
 
     }
@@ -418,49 +324,9 @@ module.exports = async function runApartmentAndGifts(page) {
   // Log locked events.
   // --------------------------------------------------------------
 
-  console.log('');
-  console.log('🔒 LOCKED EVENTS:');
-
-  if (lockedEvents.length === 0) {
-
-    console.log('   None.');
-
-  } else {
-
-    for (const event of lockedEvents) {
-
-      console.log(
-        `   🔒 ID ${event.id} | ${event.title} | Reason: ${event.lockReason}`
-      );
-
-    }
-
-  }
-
-
-
   // --------------------------------------------------------------
   // Log unlocked events.
   // --------------------------------------------------------------
-
-  console.log('');
-  console.log('🟢 UNLOCKED EVENTS:');
-
-  if (unlockedEvents.length === 0) {
-
-    console.log('   None.');
-
-  } else {
-
-    for (const event of unlockedEvents) {
-
-      console.log(
-        `   🟢 ID ${event.id} | ${event.title}`
-      );
-
-    }
-
-  }
 
 
 
@@ -470,14 +336,7 @@ module.exports = async function runApartmentAndGifts(page) {
 
   if (unlockedEvents.length === 0) {
 
-    console.log('');
-    console.log('🚫 No unlocked Gifts flashback events were found.');
-    console.log('⛔ Cannot activate an event.');
-    console.log('🏁 Gifts processing finished.');
-
-    console.log(
-      '════════════════════════════════════════════════════════════════'
-    );
+    console.log('🎁 No unlocked Gifts flashback events. Skipping.');
 
     return;
 
@@ -490,17 +349,11 @@ module.exports = async function runApartmentAndGifts(page) {
   // 🎯 RANDOMLY CHOOSE ONE UNLOCKED EVENT
   // ==============================================================
 
-  console.log('');
-  console.log('────────────────────────────────────────────────────────────────');
-  console.log('🎯 STEP 6: Choosing one unlocked Gifts event...');
-  console.log('────────────────────────────────────────────────────────────────');
-
-
   // Your instructions say that only ONE event should be activated,
   // and that the event should be selected randomly.
 
   const randomIndex = Math.floor(
-    Math.random() * unlockedEvents.length
+    Math.random() \* unlockedEvents.length
   );
 
 
@@ -508,11 +361,7 @@ module.exports = async function runApartmentAndGifts(page) {
 
 
   console.log(
-    `🎯 Randomly selected event: ${selectedEvent.title}`
-  );
-
-  console.log(
-    `🆔 Selected event ID: ${selectedEvent.id}`
+    `🎯 Activating Gifts event: ${selectedEvent.title} (ID ${selectedEvent.id})`
   );
 
 
@@ -520,13 +369,6 @@ module.exports = async function runApartmentAndGifts(page) {
   // ==============================================================
   // STEP 6 - ACTIVATE EVENT
   // ==============================================================
-
-  console.log('');
-  console.log('🚀 Sending activation request...');
-  console.log('🌐 Endpoint: /ajax/events.php');
-  console.log('📦 type = activateEvent');
-  console.log(`🆔 event_id = ${selectedEvent.id}`);
-
 
   let activationResponse;
 
@@ -536,7 +378,7 @@ module.exports = async function runApartmentAndGifts(page) {
     activationResponse = await page.evaluate(async (eventId) => {
 
       const response = await fetch(
-        'https://v3.g.ladypopular.com/ajax/events.php',
+        '[https://v3.g.ladypopular.com/ajax/events.php](https://v3.g.ladypopular.com/ajax/events.php)',
         {
           method: 'POST',
 
@@ -547,7 +389,7 @@ module.exports = async function runApartmentAndGifts(page) {
 
           body: new URLSearchParams({
             type: 'activateEvent',
-            event_id: String(eventId)
+            event\_id: String(eventId)
           }),
 
           credentials: 'same-origin'
@@ -562,7 +404,7 @@ module.exports = async function runApartmentAndGifts(page) {
   } catch (error) {
 
     console.log(
-      `❌ Event activation request failed: ${error.message}`
+      `❌ Event activation failed: ${error.message}`
     );
 
     throw error;
@@ -570,40 +412,16 @@ module.exports = async function runApartmentAndGifts(page) {
   }
 
 
-
-  console.log('📦 Activation response received.');
-
-  console.log(
-    `📊 Activation response status: ${activationResponse?.status}`
-  );
-
-
-  // --------------------------------------------------------------
-  // According to your instructions:
-  //
-  // status = 1 → SUCCESS
-  // --------------------------------------------------------------
-
   if (activationResponse?.status === 1) {
 
-    console.log('');
-    console.log('🎉🎉🎉 EVENT ACTIVATION SUCCESSFUL! 🎉🎉🎉');
-
     console.log(
-      `🎁 Activated Gifts event: ${selectedEvent.title}`
-    );
-
-    console.log(
-      `🆔 Event ID: ${selectedEvent.id}`
+      `✅ Gifts flashback activated: ${selectedEvent.title}`
     );
 
   } else {
 
-    console.log('');
-    console.log('❌ EVENT ACTIVATION FAILED.');
-
     console.log(
-      `📊 Server returned status: ${activationResponse?.status}`
+      `❌ Event activation failed. Status=${activationResponse?.status}`
     );
 
     // Do not silently pretend activation worked.
@@ -615,13 +433,4 @@ module.exports = async function runApartmentAndGifts(page) {
   }
 
 
-
-  // ==============================================================
-  // FINISHED
-  // ==============================================================
-
-  console.log('');
-  console.log('════════════════════════════════════════════════════════════════');
-  console.log('🎉 APARTMENT + GIFTS FLASHBACK SCRIPT FINISHED SUCCESSFULLY.');
-  console.log('════════════════════════════════════════════════════════════════');
 };
