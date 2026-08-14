@@ -23,12 +23,14 @@ const runPetTraining = require('./pet-train.js');
 const runBridesmaids = require('./bridesmaids.js');
 const runParties = require('./parties.js');
 const runApartmentAndGifts = require('./apartment-gifts.js');
+const runBattlePassChests = require('./battlepass-chests.js');
 
 
 
 const scripts = [
-
-  { name: 'Burn Energy', fn: runBurnEnergy, alwaysRun: true },
+  { name: 'Burn Energy - Before Chests', fn: runBurnEnergy, alwaysRun: true },
+  { name: 'Battle Pass Chests', fn: runBattlePassChests, alwaysRun: true },
+  { name: 'Burn Energy - After Chests', fn: runBurnEnergy, alwaysRun: true },
 
   { name: 'Fashion Magazine', fn: runFashionMagazine, envKey: 'LP_FASHION_MAGAZINE_URL' },
 
@@ -46,17 +48,17 @@ const scripts = [
 
   { name: 'Furniture Script', fn: runFurnitureScript, alwaysRun: false },
 
-  { name: 'Daily Tasks', fn: runDailyTasks, alwaysRun: true },
+  { name: 'Daily Tasks', fn: runDailyTasks, alwaysRun: false },
 
-  { name: 'Boyfriend Kiss', fn: runBoyfriendKiss, alwaysRun: true },
+  { name: 'Boyfriend Kiss', fn: runBoyfriendKiss, alwaysRun: false },
 
-  { name: 'Guild Show', fn: runGuildShow, alwaysRun: true },
+  { name: 'Guild Show', fn: runGuildShow, alwaysRun: false },
 
-  { name: 'Pet Training', fn: runPetTraining, alwaysRun: true },
+  { name: 'Pet Training', fn: runPetTraining, alwaysRun: false },
 
   { name: 'Bridesmaids Tasks', fn: runBridesmaids, alwaysRun: false },
 
-  { name: 'Apartment + Gifts', fn: runApartmentAndGifts, alwaysRun: true },
+  { name: 'Apartment + Gifts', fn: runApartmentAndGifts, alwaysRun: false },
 
 ];
 
