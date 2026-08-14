@@ -252,7 +252,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // According to the response you provided.
   // --------------------------------------------------------------
 
-  const events = eventsResponse.search\_events?.list;
+  const events = eventsResponse.search_events?.list;
 
 
   if (!Array.isArray(events)) {
