@@ -11,14 +11,13 @@
 // IMPORTANT:
 // - This script uses internal game requests instead of normal clicks
 //   wherever possible.
-// - Lots of console logs are included so errors are easier to debug.
 // - The existing Playwright "page" from mspc.js is reused.
 // ================================================================
 
 
 module.exports = async function runApartmentAndGifts(page) {
 
-  console.log('🏠 Apartment + Gifts flashback starting...');
+  console.log('🏠 Apartment + Gifts flashback starting.');
 
 
   // ==============================================================
@@ -27,7 +26,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // ==============================================================
 
   await page.goto(
-    '[https://v3.g.ladypopular.com/apartment.php](https://v3.g.ladypopular.com/apartment.php)',
+    'https://v3.g.ladypopular.com/apartment.php',
     {
       waitUntil: 'domcontentloaded',
       timeout: 60000
@@ -54,7 +53,7 @@ module.exports = async function runApartmentAndGifts(page) {
     const apartmentResponse = await page.evaluate(async () => {
 
       const response = await fetch(
-        '[https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent](https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent)',
+        'https://v3.g.ladypopular.com/ajax/apartment.php?type=collectApartmentRent',
         {
           method: 'GET',
           credentials: 'same-origin',
@@ -101,7 +100,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // ==============================================================
 
   await page.goto(
-    '[https://v3.g.ladypopular.com/guild.php](https://v3.g.ladypopular.com/guild.php)',
+    'https://v3.g.ladypopular.com/guild.php',
     {
       waitUntil: 'domcontentloaded',
       timeout: 60000
@@ -119,15 +118,15 @@ module.exports = async function runApartmentAndGifts(page) {
   //
   // We specifically look for:
   //
-  // .header-event-banner[data-is\_flashback="1"]
+  // .header-event-banner[data-is_flashback="1"]
   //
   // A normal/new event has:
   //
-  // data-is\_flashback=""
+  // data-is_flashback=""
   //
   // An active flashback event has:
   //
-  // data-is\_flashback="1"
+  // data-is_flashback="1"
   //
   // We only care about the EVENT flashback slot here.
   // We do NOT treat a flashback collection as an active
@@ -135,7 +134,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // --------------------------------------------------------------
 
   const activeFlashbackEvents = await page.locator(
-    '#header-events-container .header-event-banner[data-is\_flashback="1"]'
+    '#header-events-container .header-event-banner[data-is_flashback="1"]'
   ).count();
 
 
@@ -179,7 +178,7 @@ module.exports = async function runApartmentAndGifts(page) {
     eventsResponse = await page.evaluate(async () => {
 
       const response = await fetch(
-        '[https://v3.g.ladypopular.com/ajax/events.php](https://v3.g.ladypopular.com/ajax/events.php)',
+        'https://v3.g.ladypopular.com/ajax/events.php',
         {
           method: 'POST',
 
@@ -189,8 +188,8 @@ module.exports = async function runApartmentAndGifts(page) {
           },
 
           body: new URLSearchParams({
-            'event\_types[]': 'gifts',
-            'ignore\_won\_rewards': 'false',
+            'event_types[]': 'gifts',
+            'ignore_won_rewards': 'false',
             'type': 'loadMoreEvents',
             'offset': '0',
             'name': ''
@@ -247,7 +246,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // --------------------------------------------------------------
   // The event list is inside:
   //
-  // response.search\_events.list
+  // response.search_events.list
   //
   // According to the response you provided.
   // --------------------------------------------------------------
@@ -275,10 +274,10 @@ module.exports = async function runApartmentAndGifts(page) {
   //
   // Your rule:
   //
-  // can\_be\_activated === true
+  // can_be_activated === true
   //       → unlocked
   //
-  // can\_be\_activated === false
+  // can_be_activated === false
   //       → locked
   // --------------------------------------------------------------
 
@@ -289,17 +288,17 @@ module.exports = async function runApartmentAndGifts(page) {
   for (const event of events) {
 
     // We are expecting flashback events here, but we still
-    // explicitly check is\_flashback so the script does not
+    // explicitly check is_flashback so the script does not
     // accidentally treat some other record as a flashback event.
 
-    if (event.is\_flashback !== true) {
+    if (event.is_flashback !== true) {
 
       continue;
 
     }
 
 
-    if (event.can\_be\_activated === true) {
+    if (event.can_be_activated === true) {
 
       unlockedEvents.push({
         id: event.id,
@@ -311,7 +310,7 @@ module.exports = async function runApartmentAndGifts(page) {
       lockedEvents.push({
         id: event.id,
         title: event.title,
-        lockReason: event.lock\_type\_info
+        lockReason: event.lock_type_info
       });
 
     }
@@ -353,7 +352,7 @@ module.exports = async function runApartmentAndGifts(page) {
   // and that the event should be selected randomly.
 
   const randomIndex = Math.floor(
-    Math.random() \* unlockedEvents.length
+    Math.random() * unlockedEvents.length
   );
 
 
@@ -378,7 +377,7 @@ module.exports = async function runApartmentAndGifts(page) {
     activationResponse = await page.evaluate(async (eventId) => {
 
       const response = await fetch(
-        '[https://v3.g.ladypopular.com/ajax/events.php](https://v3.g.ladypopular.com/ajax/events.php)',
+        'https://v3.g.ladypopular.com/ajax/events.php',
         {
           method: 'POST',
 
@@ -389,7 +388,7 @@ module.exports = async function runApartmentAndGifts(page) {
 
           body: new URLSearchParams({
             type: 'activateEvent',
-            event\_id: String(eventId)
+            event_id: String(eventId)
           }),
 
           credentials: 'same-origin'
