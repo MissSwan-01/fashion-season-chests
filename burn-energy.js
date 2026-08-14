@@ -6,68 +6,83 @@ module.exports = async function runBurnEnergy(page) {
 
   async function spendExcessTickets() {
 
-    console.log("🎟️ Checking ticket count...");
+    try {
 
-    const getTicketCount = async () => {
-      const ticketText = await page.innerText('.bp-pass-amount');
-      return parseInt(ticketText.trim());
-    };
+      console.log("🎟️ Checking ticket count...");
 
-    let tickets = await getTicketCount();
+      // The ticket count is available on the Beauty Pageant page.
+      await page.goto(
+        'https://v3.g.ladypopular.com/beauty_pageant.php',
+        {
+          waitUntil: 'domcontentloaded',
+          timeout: 60000
+        }
+      );
 
-    console.log(`🎟️ You have ${tickets} tickets.`);
+      const getTicketCount = async () => {
+        const ticketText = await page.innerText('.bp-pass-amount');
+        return parseInt(ticketText.trim());
+      };
 
-    let ticketsToUse = tickets - 10;
+      const tickets = await getTicketCount();
 
-    if (ticketsToUse <= 0) {
-      console.log(`🚫 Tickets are ${tickets}. Not more than 10. Skipping.`);
-      return;
-    }
+      console.log(`🎟️ You have ${tickets} tickets.`);
 
-    console.log(`🎯 Using ${ticketsToUse} ticket(s)...`);
+      const ticketsToUse = tickets - 10;
 
-    while (ticketsToUse > 0) {
+      if (ticketsToUse <= 0) {
+        console.log("🚫 No excess tickets to spend.");
+        return;
+      }
 
-      try {
+      console.log(`🎯 Sending ${ticketsToUse} competeInDuel requests...`);
 
-        await page.evaluate(async () => {
+      for (let i = 1; i <= ticketsToUse; i++) {
 
-          const response = await fetch(
-            '/ajax/beauty_pageant.php',
-            {
+        try {
+
+          await page.evaluate(async () => {
+
+            await fetch('/ajax/beauty_pageant.php', {
               method: 'POST',
-
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
               },
-
               credentials: 'same-origin',
-
               body: new URLSearchParams({
                 action: 'competeInDuel'
               })
-            }
-          );
+            });
 
-          await response.text();
+          });
 
-        });
+          await page.waitForTimeout(10);
 
-        await page.waitForTimeout(10);
+        } catch (err) {
 
-        ticketsToUse--;
+          console.log(`⚠️ Ticket request ${i} failed: ${err.message}`);
 
-      } catch (e) {
-
-        console.log(`⚠️ Ticket request failed: ${e.message}`);
-        break;
-
+        }
       }
-    }
 
-    console.log("✅ Finished using excess tickets.");
+      console.log("✅ Excess ticket spending finished.");
+
+    } catch (err) {
+
+      // IMPORTANT:
+      // Ticket spending is allowed to fail without stopping
+      // Beauty Pageant or Fashion Arena.
+      console.log(`⚠️ Ticket spending skipped: ${err.message}`);
+
+    }
   }
 
+
+  // ==============================================================
+  // 🎟️ FIRST TICKET SPENDING
+  // ==============================================================
+
+  await spendExcessTickets();
 
 
   // ==============================================================
@@ -80,14 +95,15 @@ module.exports = async function runBurnEnergy(page) {
       '#header > div.wrapper > div > div.player-panel-middle > div.player-panel-energy > a.player-energy.player-bp-energy > span.player-energy-value';
 
     const blueEnergyText = await page.innerText(energySelector);
-
     const blueEnergy = parseInt(blueEnergyText.trim());
 
     const judgeCycles = Math.floor(blueEnergy / 2);
 
-    return { blueEnergy, judgeCycles };
+    return {
+      blueEnergy,
+      judgeCycles
+    };
   }
-
 
 
   async function performJudgeCycle() {
@@ -100,18 +116,13 @@ module.exports = async function runBurnEnergy(page) {
 
       const duelRes = await page.evaluate(async () => {
 
-        const res = await fetch(
-          '/ajax/beauty_pageant.php',
-          {
-            method: 'POST',
-
-            body: new URLSearchParams({
-              action: 'judgeDuel'
-            }),
-
-            credentials: 'same-origin'
-          }
-        );
+        const res = await fetch('/ajax/beauty_pageant.php', {
+          method: 'POST',
+          body: new URLSearchParams({
+            action: 'judgeDuel'
+          }),
+          credentials: 'same-origin'
+        });
 
         return await res.json();
 
@@ -119,7 +130,6 @@ module.exports = async function runBurnEnergy(page) {
 
 
       const matchRegex = /<a id="ladyIdContainer-(\d+)-([^"]+)"/g;
-
       const matches = [...duelRes.html.matchAll(matchRegex)];
 
 
@@ -135,28 +145,22 @@ module.exports = async function runBurnEnergy(page) {
         const pickFirst = Math.random() < 0.5;
 
         const winner = pickFirst ? id1 : id2;
-
         const winnerGameId = pickFirst ? gameId1 : gameId2;
 
 
         const voteRes = await page.evaluate(
           async ({ duelId, winnerId, winnerGameId }) => {
 
-            const res = await fetch(
-              '/ajax/beauty_pageant.php',
-              {
-                method: 'POST',
-
-                body: new URLSearchParams({
-                  action: 'chooseWinner',
-                  duel_id: duelId,
-                  winner_id: winnerId,
-                  winner_game_id: winnerGameId
-                }),
-
-                credentials: 'same-origin'
-              }
-            );
+            const res = await fetch('/ajax/beauty_pageant.php', {
+              method: 'POST',
+              body: new URLSearchParams({
+                action: 'chooseWinner',
+                duel_id: duelId,
+                winner_id: winnerId,
+                winner_game_id: winnerGameId
+              }),
+              credentials: 'same-origin'
+            });
 
             return await res.json();
 
@@ -185,10 +189,10 @@ module.exports = async function runBurnEnergy(page) {
   }
 
 
+  console.log("🔷 Starting Beauty Pageant energy burn...");
 
-  async function runBeautyPageant() {
 
-    console.log("🔷 Starting Beauty Pageant energy burn...");
+  try {
 
     while (true) {
 
@@ -200,12 +204,13 @@ module.exports = async function runBurnEnergy(page) {
         }
       );
 
-
       await page.waitForTimeout(5000);
 
 
-      const { blueEnergy, judgeCycles } =
-        await getJudgeCycles();
+      const {
+        blueEnergy,
+        judgeCycles
+      } = await getJudgeCycles();
 
 
       console.log(
@@ -240,24 +245,15 @@ module.exports = async function runBurnEnergy(page) {
         }
       }
     }
+
+  } catch (err) {
+
+    // Beauty Pageant failure must not prevent Fashion Arena.
+    console.log(
+      `⚠️ Beauty Pageant section failed: ${err.message}`
+    );
+
   }
-
-
-
-  // ==============================================================
-  // 🎟️ FIRST TICKET SPENDING
-  // ==============================================================
-
-  await spendExcessTickets();
-
-
-
-  // ==============================================================
-  // 🔷 FIRST BEAUTY PAGEANT JUDGING
-  // ==============================================================
-
-  await runBeautyPageant();
-
 
 
   // ==============================================================
@@ -267,14 +263,13 @@ module.exports = async function runBurnEnergy(page) {
   await spendExcessTickets();
 
 
-
   // ==============================================================
   // 🟧 FASHION ARENA
   // ==============================================================
 
   let arenaEnergy = 1;
-
   let arenaErrors = 0;
+
 
   while (arenaEnergy > 0) {
 
@@ -300,9 +295,7 @@ module.exports = async function runBurnEnergy(page) {
           timeout: 30000
         });
 
-        await page.waitForLoadState(
-          'domcontentloaded'
-        );
+        await page.waitForLoadState('domcontentloaded');
       }
 
 
@@ -311,15 +304,10 @@ module.exports = async function runBurnEnergy(page) {
       );
 
 
-      arenaEnergy = parseInt(
-        energyText.trim()
-      );
+      arenaEnergy = parseInt(energyText.trim());
 
 
-      if (
-        arenaEnergy <= 0 ||
-        isNaN(arenaEnergy)
-      ) {
+      if (arenaEnergy <= 0 || isNaN(arenaEnergy)) {
 
         console.log(
           "✅ No energy left. Skipping Fashion Arena."
@@ -344,15 +332,12 @@ module.exports = async function runBurnEnergy(page) {
               'https://v3.g.ladypopular.com/ajax/arena.php',
               {
                 method: 'POST',
-
                 headers: {
                   'Content-Type':
                     'application/x-www-form-urlencoded',
-
                   'X-Requested-With':
                     'XMLHttpRequest'
                 },
-
                 body: new URLSearchParams({
                   action: 'challenge'
                 })
@@ -362,10 +347,7 @@ module.exports = async function runBurnEnergy(page) {
           });
 
 
-          console.log(
-            `⚔️ Duel ${i + 1}`
-          );
-
+          console.log(`⚔️ Duel ${i + 1}`);
 
           await page.waitForTimeout(100);
 
@@ -384,10 +366,7 @@ module.exports = async function runBurnEnergy(page) {
         timeout: 30000
       });
 
-
-      await page.waitForLoadState(
-        'domcontentloaded'
-      );
+      await page.waitForLoadState('domcontentloaded');
 
 
       const energyAfter = await page.innerText(
@@ -395,9 +374,7 @@ module.exports = async function runBurnEnergy(page) {
       );
 
 
-      arenaEnergy = parseInt(
-        energyAfter.trim()
-      );
+      arenaEnergy = parseInt(energyAfter.trim());
 
 
       if (arenaEnergy > 0) {
@@ -416,8 +393,7 @@ module.exports = async function runBurnEnergy(page) {
       }
 
 
-      // Successful Fashion Arena pass.
-      // Reset consecutive error counter.
+      // Successful cycle resets consecutive error count.
       arenaErrors = 0;
 
 
@@ -444,29 +420,24 @@ module.exports = async function runBurnEnergy(page) {
         "🔁 Refreshing page to retry Fashion Arena..."
       );
 
+      try {
 
-      await page.reload({
-        timeout: 60000
-      });
+        await page.reload({
+          timeout: 60000
+        });
 
-      await page.waitForTimeout(5000);
+        await page.waitForTimeout(5000);
+
+      } catch (reloadError) {
+
+        console.log(
+          `⚠️ Retry refresh failed: ${reloadError.message}`
+        );
+
+      }
     }
   }
 
 
-
-  // ==============================================================
-  // 🔷 SECOND BEAUTY PAGEANT JUDGING
-  // ==============================================================
-
-  await runBeautyPageant();
-
-
-
-  // ==============================================================
-  // 🎟️ THIRD TICKET SPENDING
-  // ==============================================================
-
-  await spendExcessTickets();
-
+  console.log("🏁 Burn Energy finished.");
 };
