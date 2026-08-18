@@ -72,7 +72,7 @@ async function login(page, account) {
 
   let loginSuccess = false;
 
-  for (let attempt = 1; attempt <= 5; attempt++) {
+  for (let attempt = 1; attempt <= 1; attempt++) { // make it 5 later
 
     try {
 
@@ -133,7 +133,7 @@ async function login(page, account) {
 
 
 
-      if (attempt === 5) {
+      if (attempt === 1) {  //make it 5 later
 
         console.log(
           `🚫 [${account.name}] Max login attempts reached. Aborting this account.`
